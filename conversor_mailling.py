@@ -1,9 +1,24 @@
 import os
 import sys
-import pandas 
+import pandas
 from tkinter import messagebox
-from criar_pastas import criar_nova_pasta
 import chardet
+from criar_pastas import criar_nova_pasta
+from funcoes_nps import processar_nps
+
+def iniciar_processo(combo_campanhas):
+    criar_nova_pasta()
+    campanha = combo_campanhas.get()
+    print(f'Campanha selecionada: {campanha}')
+
+    planilha, encoding_detectado = ler_arquivo_csv()
+    if planilha is None:
+        return
+
+    if campanha == "PESQUISA_NPS":
+        planilha = processar_nps(planilha)  # faz as modificações de colunas F, W, AT
+
+    exportar_para_txt(planilha, campanha, encoding_detectado)
 
 def ler_arquivo_csv():
     if getattr(sys, 'frozen', False):
@@ -37,7 +52,6 @@ def ler_arquivo_csv():
         messagebox.showerror('Erro', f'Erro ao ler o arquivo:\n{str(erro)}')
         return None, None
 
-
 def exportar_para_txt(planilha: pandas.DataFrame, campanha: str, encoding: str):
     if getattr(sys, 'frozen', False):
         diretorio = os.path.dirname(sys.executable)
@@ -45,7 +59,6 @@ def exportar_para_txt(planilha: pandas.DataFrame, campanha: str, encoding: str):
         diretorio = os.path.dirname(os.path.abspath(__file__))
 
     pasta_saida = os.path.join(diretorio, 'pasta-fim')
-    os.makedirs(pasta_saida, exist_ok=True)
 
     caminho_arquivo = os.path.join(pasta_saida, f'{campanha}.txt')
     caminho_log_erros = os.path.join(pasta_saida, f'{campanha}_erros.txt')
@@ -91,16 +104,3 @@ def exportar_para_txt(planilha: pandas.DataFrame, campanha: str, encoding: str):
             arquivo_saida.write(linha_txt + '\n')
 
     messagebox.showinfo("Sucesso", f"Arquivo '{campanha}.txt' exportado com sucesso para a pasta-fim.")
-
-
-def conversor_normal(combo_campanhas):
-    criar_nova_pasta()
-    campanha = combo_campanhas.get()
-    print(f'Campanha selecionada: {campanha}')
-
-    planilha, encoding_detectado = ler_arquivo_csv()
-    if planilha is not None and encoding_detectado is not None:
-        exportar_para_txt(planilha, campanha, encoding_detectado)
-        print('Processo concluído com sucesso.')
-    else:
-        print('Processo interrompido.')
