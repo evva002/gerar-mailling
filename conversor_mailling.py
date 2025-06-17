@@ -5,17 +5,19 @@ from tkinter import messagebox
 import chardet
 from criar_pastas import criar_nova_pasta
 from funcoes_nps import processar_nps
+from funcoes_nps import iniciar_processo_conversao
 
 def iniciar_processo(combo_campanhas):
     criar_nova_pasta()
     campanha = combo_campanhas.get()
     print(f'Campanha selecionada: {campanha}')
 
-    planilha, encoding_detectado = ler_arquivo_csv()
+    planilha, encoding_detectado, caminho_arquivo = ler_arquivo_csv()
     if planilha is None:
         return
 
     if campanha == "PESQUISA_NPS":
+        planilha = iniciar_processo_conversao(planilha, caminho_arquivo)
         planilha = processar_nps(planilha)  # faz as modificações de colunas F, W, AT
 
     exportar_para_txt(planilha, campanha, encoding_detectado)
@@ -27,11 +29,11 @@ def ler_arquivo_csv():
         diretorio_atual = os.path.dirname(os.path.abspath(__file__))
 
     pasta_inicio = os.path.join(diretorio_atual, 'pasta-inicio')
-    arquivos_csv = [arquivo for arquivo in os.listdir(pasta_inicio) if arquivo.lower().endswith('.csv')]
+    arquivos_csv = [arquivo for arquivo in os.listdir(pasta_inicio) if arquivo.lower().endswith(('.csv', 'xlsx'))]
 
     if not arquivos_csv:
         messagebox.showerror('Erro', 'Nenhum arquivo .csv encontrado na pasta-inicio')
-        return None, None
+        return None, None, None
 
     caminho_arquivo = os.path.join(pasta_inicio, arquivos_csv[0])
 
@@ -42,15 +44,19 @@ def ler_arquivo_csv():
             print(f"Encoding detectado: {encoding_detectado}")
     except Exception as erro:
         messagebox.showerror('Erro', f'Erro ao detectar codificação:\n{str(erro)}')
-        return None, None
+        return None, None, None
 
     try:
-        planilha = pandas.read_csv(caminho_arquivo, encoding=encoding_detectado, sep=';', dtype=str)
-        messagebox.showinfo('Sucesso', f'Arquivo lido com sucesso: {arquivos_csv[0]}')
-        return planilha, encoding_detectado
+        if caminho_arquivo.lower().endswith('.csv'):
+            planilha = pandas.read_csv(caminho_arquivo, encoding=encoding_detectado, sep=';', dtype=str)
+            messagebox.showinfo('Sucesso', f'Arquivo lido com sucesso: {arquivos_csv[0]}')
+            print(planilha.columns.tolist())
+        else:
+            planilha = pandas.read_excel(caminho_arquivo, dtype=str)
+        return planilha, encoding_detectado, caminho_arquivo
     except Exception as erro:
         messagebox.showerror('Erro', f'Erro ao ler o arquivo:\n{str(erro)}')
-        return None, None
+        return None, None, None
 
 def exportar_para_txt(planilha: pandas.DataFrame, campanha: str, encoding: str):
     if getattr(sys, 'frozen', False):
