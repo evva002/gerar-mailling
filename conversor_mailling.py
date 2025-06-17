@@ -1,73 +1,98 @@
 import os
-import sys
 import pandas
-from tkinter import messagebox
+from tkinter import messagebox, filedialog
 import chardet
-from criar_pastas import criar_nova_pasta
 from funcoes_nps import processar_nps
 from funcoes_nps import iniciar_processo_conversao
+from renomear import renomear_campanha
+import zipfile
+import io
 
-def iniciar_processo(combo_campanhas):
-    criar_nova_pasta()
+def iniciar_processo(combo_campanhas, pasta_saida):
+    if not pasta_saida:
+        messagebox.showerror("Erro", "Primeiro selecione a pasta de destino!")
+        return
+
     campanha = combo_campanhas.get()
     print(f'Campanha selecionada: {campanha}')
 
-    planilha, encoding_detectado, caminho_arquivo = ler_arquivo_csv()
+    planilha, encoding_detectado = ler_arquivo_csv()
     if planilha is None:
         return
 
-    if campanha == "PESQUISA_NPS":
-        planilha = iniciar_processo_conversao(planilha, caminho_arquivo)
-        planilha = processar_nps(planilha)  # faz as modificações de colunas F, W, AT
+    # Processamento especial para NPS (seja de ZIP ou não)
+    if 'NPS' in campanha.upper():
+        planilha = iniciar_processo_conversao(planilha)
+        planilha = processar_nps(planilha)
 
-    exportar_para_txt(planilha, campanha, encoding_detectado)
+    exportar_para_txt(planilha, campanha, encoding_detectado, pasta_saida)
+
 
 def ler_arquivo_csv():
-    if getattr(sys, 'frozen', False):
-        diretorio_atual = os.path.dirname(sys.executable)
-    else:
-        diretorio_atual = os.path.dirname(os.path.abspath(__file__))
+    caminho_arquivo = filedialog.askopenfilename(
+        title="Selecione o arquivo (.csv, .xlsx ou .zip)",
+        filetypes=[("Arquivos suportados", "*.csv *.xlsx *.zip")]
+    )
 
-    pasta_inicio = os.path.join(diretorio_atual, 'pasta-inicio')
-    arquivos_csv = [arquivo for arquivo in os.listdir(pasta_inicio) if arquivo.lower().endswith(('.csv', 'xlsx'))]
-
-    if not arquivos_csv:
-        messagebox.showerror('Erro', 'Nenhum arquivo .csv encontrado na pasta-inicio')
-        return None, None, None
-
-    caminho_arquivo = os.path.join(pasta_inicio, arquivos_csv[0])
+    if not caminho_arquivo:
+        return None, None
 
     try:
+        # Verifica se é um arquivo ZIP
+        if caminho_arquivo.lower().endswith('.zip'):
+            with zipfile.ZipFile(caminho_arquivo, 'r') as zip_ref:
+                # Lista arquivos no ZIP
+                arquivos_no_zip = [f for f in zip_ref.namelist() if f.lower().endswith(('.csv', '.xlsx'))]
+                
+                if not arquivos_no_zip:
+                    messagebox.showerror('Erro', 'Nenhum arquivo .csv ou .xlsx encontrado no ZIP')
+                    return None, None
+                
+                # Pega o primeiro arquivo válido (ou pode implementar uma seleção)
+                arquivo_no_zip = arquivos_no_zip[0]
+                
+                # Detecta encoding
+                with zip_ref.open(arquivo_no_zip) as f:
+                    conteudo = f.read(10000)
+                    resultado = chardet.detect(conteudo)
+                    encoding_detectado = resultado['encoding']
+                    print(f"Encoding detectado: {encoding_detectado}")
+                
+                # Lê o arquivo
+                with zip_ref.open(arquivo_no_zip) as f:
+                    if arquivo_no_zip.lower().endswith('.csv'):
+                        planilha = pandas.read_csv(io.BytesIO(f.read()), encoding=encoding_detectado, sep=';', dtype=str)
+                    else:
+                        planilha = pandas.read_excel(io.BytesIO(f.read()), dtype=str)
+                
+                return planilha, encoding_detectado
+
+        # Fluxo normal para arquivos não-ZIP
         with open(caminho_arquivo, 'rb') as f:
             resultado = chardet.detect(f.read(10000))
             encoding_detectado = resultado['encoding']
             print(f"Encoding detectado: {encoding_detectado}")
-    except Exception as erro:
-        messagebox.showerror('Erro', f'Erro ao detectar codificação:\n{str(erro)}')
-        return None, None, None
 
-    try:
         if caminho_arquivo.lower().endswith('.csv'):
             planilha = pandas.read_csv(caminho_arquivo, encoding=encoding_detectado, sep=';', dtype=str)
-            messagebox.showinfo('Sucesso', f'Arquivo lido com sucesso: {arquivos_csv[0]}')
-            print(planilha.columns.tolist())
         else:
             planilha = pandas.read_excel(caminho_arquivo, dtype=str)
-        return planilha, encoding_detectado, caminho_arquivo
+        
+        return planilha, encoding_detectado
+
     except Exception as erro:
         messagebox.showerror('Erro', f'Erro ao ler o arquivo:\n{str(erro)}')
         return None, None, None
 
-def exportar_para_txt(planilha: pandas.DataFrame, campanha: str, encoding: str):
-    if getattr(sys, 'frozen', False):
-        diretorio = os.path.dirname(sys.executable)
-    else:
-        diretorio = os.path.dirname(os.path.abspath(__file__))
+def exportar_para_txt(planilha: pandas.DataFrame, campanha: str, encoding: str, pasta_saida: str):
+    if not pasta_saida:
+        messagebox.showerror("Erro", "Nenhuma pasta de destino selecionada!")
+        return
 
-    pasta_saida = os.path.join(diretorio, 'pasta-fim')
+    nome_campanha = renomear_campanha(campanha)
 
-    caminho_arquivo = os.path.join(pasta_saida, f'{campanha}.txt')
-    caminho_log_erros = os.path.join(pasta_saida, f'{campanha}_erros.txt')
+    caminho_arquivo = os.path.join(pasta_saida, f'{nome_campanha}.txt')
+    caminho_log_erros = os.path.join(pasta_saida, f'{nome_campanha}_erros.txt')
 
     larguras = [
         20, 1, 14, 10, 15, 2, 15, 15, 60, 11, 11, 11, 11, 100, 15, 100, 5, 100, 50,
@@ -109,4 +134,5 @@ def exportar_para_txt(planilha: pandas.DataFrame, campanha: str, encoding: str):
             linha_txt = ''.join(colunas_formatadas)
             arquivo_saida.write(linha_txt + '\n')
 
-    messagebox.showinfo("Sucesso", f"Arquivo '{campanha}.txt' exportado com sucesso para a pasta-fim.")
+    messagebox.showinfo("Sucesso", 
+        f"Arquivo '{nome_campanha}.txt' exportado com sucesso para:\n{pasta_saida}")

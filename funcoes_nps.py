@@ -1,9 +1,7 @@
 import pandas
-import os
-import sys
 from tkinter import messagebox
 
-def iniciar_processo_conversao(planilha, caminho_original):
+def iniciar_processo_conversao(planilha):
     print('Iniciando processamento direto...')
 
     colunas_alvo = ['COD_CPF_CGC', 'FONE_1', 'FONE_2', 'FONE_3', 'FONE_4']
@@ -19,24 +17,6 @@ def iniciar_processo_conversao(planilha, caminho_original):
             planilha[coluna] = pandas.to_numeric(planilha[coluna], errors='coerce')
             planilha[coluna] = planilha[coluna].dropna().astype(int)
             planilha[coluna] = planilha[coluna].astype('Int64')
-
-    # Cria nome do novo arquivo com base no original
-    nome_base = os.path.splitext(os.path.basename(caminho_original))[0]
-    nome_saida = nome_base + '.csv'
-
-    # Define diretório onde salvar
-    if getattr(sys, 'frozen', False):
-        pasta_destino = os.path.dirname(sys.executable)
-    else:
-        pasta_destino = os.path.dirname(os.path.abspath(__file__))
-
-    caminho_saida = os.path.join(pasta_destino, nome_saida)
-
-    try:
-        planilha.to_csv(caminho_saida, index=False, sep=';')
-        messagebox.showinfo("Sucesso", f"Arquivo salvo com sucesso como:\n{caminho_saida}")
-    except Exception as erro:
-        messagebox.showerror("Erro", f"Erro ao salvar o arquivo:\n{str(erro)}")
 
     return planilha  # Retorna a planilha modificada caso outras funções queiram continuar
 
