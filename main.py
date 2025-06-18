@@ -41,7 +41,7 @@ label_campanha = tkinter.Label(janela_principal,
                                fg='white')
 label_campanha.pack(pady=10)
 
-campanhas = ['TRAT_OS_PEND_FIB_EMP', 'CRV_ATIVO_NOVA_FIBRA', 'CRV_MIGRACAO_FIBRA', 'PESQUISA_NPS_ND', 'PESQUISA_NPS2_ND']
+campanhas = ['TRAT_OS_PEND_FIB_EMP', 'CRV_ATIVO_NOVA_FIBRA', 'CRV_MIGRACAO_FIBRA', 'PESQUISA_NPS_ND', 'PESQUISA_NPS2_ND', 'PESQUISA_NPS3_ND']
 campanhas_ordenadas = sorted(campanhas, key=str.lower)
 combo_campanhas = ttk.Combobox(janela_principal, values=campanhas_ordenadas, state='readonly')
 combo_campanhas.current(0)

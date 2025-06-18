@@ -7,6 +7,7 @@ from funcoes_nps import iniciar_processo_conversao
 from renomear import renomear_campanha
 import zipfile
 import io
+import sys
 
 def iniciar_processo(combo_campanhas, pasta_saida):
     if not pasta_saida:
@@ -90,9 +91,15 @@ def exportar_para_txt(planilha: pandas.DataFrame, campanha: str, encoding: str, 
         return
 
     nome_campanha = renomear_campanha(campanha)
-
     caminho_arquivo = os.path.join(pasta_saida, f'{nome_campanha}.txt')
-    caminho_log_erros = os.path.join(pasta_saida, f'{nome_campanha}_erros.txt')
+    
+    if getattr(sys, 'frozen', False):
+        # Executável (.exe)
+        caminho_log = os.path.dirname(sys.executable)
+    else:
+        # Script (.py)
+        caminho_log = os.path.dirname(os.path.abspath(__file__))
+    caminho_log_erros = os.path.join(caminho_log, f'{nome_campanha}_erros.txt')
 
     larguras = [
         20, 1, 14, 10, 15, 2, 15, 15, 60, 11, 11, 11, 11, 100, 15, 100, 5, 100, 50,
