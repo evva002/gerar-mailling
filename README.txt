@@ -3,7 +3,7 @@ GERADOR DE MAILLING - GUIA
 COMO USAR
 
 1. Abra o arquivo
-   Dê dois cliques no arquivo gerar_mailling.exe
+   Dê dois cliques no arquivo gerar-mailing.exe
 
 PASSO A PASSO
 
