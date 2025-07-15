@@ -1,6 +1,6 @@
 🚀 Como usar
 Abra o arquivo
-Dê dois cliques no arquivo gerar_mailling.exe.
+Dê dois cliques no arquivo gerar-mailing.exe.
 
 Passo 1: Selecione a pasta de saída
 Clique no botão Selecionar Pasta de Saída.
