@@ -1,64 +1,61 @@
-🚀 Como usar
-Abra o arquivo
-Dê dois cliques no arquivo gerar_mailling.exe.
+GERADOR DE MAILLING - GUIA
 
-Passo 1: Selecione a pasta de saída
-Clique no botão Selecionar Pasta de Saída.
-Essa será a pasta onde o arquivo final .txt será salvo.
+COMO USAR
 
-Passo 2: Selecione a campanha
-No menu suspenso, escolha uma das campanhas:
+1. Abra o arquivo
+   Dê dois cliques no arquivo gerar_mailling.exe
 
-TRAT_OS_PEND_FIB_EMP
+PASSO A PASSO
 
-CRV_ATIVO_NOVA_FIBRA
+PASSO 1: SELECIONE A PASTA DE SAÍDA
+- Clique no botão "Selecionar Pasta de Saída".
+- Essa será a pasta onde o arquivo final .txt será salvo.
 
-CRV_MIGRACAO_FIBRA
+PASSO 2: SELECIONE OU EDITE A CAMPANHA
+- Use o menu suspenso para selecionar uma campanha já existente.
+- OU digite o nome de uma nova campanha personalizada na caixa de texto.
 
-PESQUISA_NPS_ND
+ADICIONAR CAMPANHA PERSONALIZADA
+- Digite o nome da nova campanha no campo de texto.
+- Clique no botão "+" para adicioná-la à lista.
+- A campanha será salva no arquivo "campanhas.txt" e estará disponível nas próximas execuções.
 
-PESQUISA_NPS2_ND
+REMOVER CAMPANHA EXISTENTE
+- Digite o nome exato da campanha no campo de texto.
+- Clique no botão "-" para removê-la da lista.
+- A campanha será excluída do arquivo "campanhas.txt".
 
-PESQUISA_NPS3_ND
+OBSERVAÇÃO:
+A lista de campanhas é carregada automaticamente do arquivo "campanhas.txt", permitindo que suas alterações permaneçam salvas mesmo após fechar o programa.
 
-⚠️ Para campanhas NPS, o sistema faz ajustes automáticos nos dados (como UF, data, etc.).
+PASSO 3: SELECIONE O ARQUIVO DE ENTRADA
+- Clique no botão "Iniciar Processo".
+- Escolha o arquivo .csv, .xlsx ou .zip (com apenas um arquivo dentro).
 
-Passo 3: Selecione o arquivo de entrada
-Clique em Iniciar Processo e selecione o arquivo .csv, .xlsx ou .zip.
+RESULTADO
+- O programa gera um arquivo .txt com o nome da campanha e data/hora, como por exemplo:
+    PESQUISA_NPS_ND_18062025_2030.txt
 
-📝 Resultado
-O arquivo gerado será salvo com o nome da campanha, data e hora, no formato .txt.
+- Se houver colunas com excesso de caracteres, será criado um arquivo com os erros:
+    PESQUISA_NPS_ND_18062025_2030_erros.txt
 
-Caso alguma coluna ultrapasse o limite de caracteres permitido, o programa criará um arquivo com os erros, como:
+TIPOS DE ARQUIVOS ACEITOS
+- .csv (separado por ponto e vírgula ;)
+- .xlsx (planilhas do Excel)
+- .zip contendo um único .csv ou .xlsx
 
-Copy
-Edit
-CRV_MIGRACAO_FIBRA_erros.txt
-Você poderá abrir esse arquivo para corrigir os dados.
+IMPORTANTE
+- O programa não altera os arquivos originais.
+- O arquivo .txt gerado segue o formato de largura fixa (colunas com tamanho máximo definido).
+- Colunas com texto acima do limite podem ser cortadas ou gerar erros.
+- Os erros vão para um arquivo de texto separado com o sufixo "_erros".
 
-📦 Tipos de arquivos aceitos
-.csv separado por ponto e vírgula (;)
+EXEMPLO DE USO
 
-.xlsx (planilhas Excel)
-
-.zip contendo um único .csv ou .xlsx
-
-❗ Importante
-O programa não altera os arquivos originais.
-
-O arquivo .txt gerado segue formato de largura fixa, exigido por sistemas de importação.
-
-Cada coluna tem um limite de caracteres. Valores maiores são cortados ou geram erro.
-
-📁 Exemplo de uso
-Selecione: C:\Usuários\Maillings\Saida
-
+Pasta de saída: C:\Usuarios\Maillings\Saida
 Campanha: PESQUISA_NPS_ND
+Arquivo de entrada: mailling_junho.xlsx
 
-Arquivo: mailling_junho.xlsx
-
-Resultado:
-
-PESQUISA_NPS_ND_18062025_20H30.txt
-
-PESQUISA_NPS_ND_18062025_20H30_erros.txt (se aplicável)
+Arquivos gerados:
+- PESQUISA_NPS_ND_18062025_2030.txt
+- PESQUISA_NPS_ND_18062025_2030_erros.txt (se aplicável)
